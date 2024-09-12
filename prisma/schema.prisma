@@ -1,0 +1,88 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum JK {
+  P
+  L
+}
+
+enum Status {
+  LUNAS
+  BELUM_LUNAS
+}
+
+enum Metode {
+  OVO
+  Gopay
+  BANK
+  KARTU_KREDIT
+}
+
+model Pelanggan {
+  id_pelanggan    Int         @id @default(autoincrement())
+  name            String      @default("")
+  email           String      @unique @default("")
+  password        String      @default("")
+  nomor_telp      String      @default("")
+  jenis_kelamin   JK          @default(L)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  detailPelanggan Transaksi[]
+}
+
+model Admin {
+  id_admin  Int         @id @default(autoincrement())
+  username  String      @unique @default("")
+  password  String      @default("")
+  Transaksi Transaksi[]
+}
+
+model Game {
+  id_game         Int               @id @default(autoincrement())
+  nama_game       String            @default("")
+  gambar_game     String            @default("")
+  video_game      String            @default("")
+  developer_game  String            @default("")
+  harga           Int               @default(0)
+  deskripsi_game  String            @default("")
+  tahun_rilis     DateTime          @default(now())
+  link_download   String            @default("")
+  description     String            @default("") @db.Text
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  detailtransaksi DetailTransaksi[]
+}
+
+model Transaksi {
+  id_transaksi      Int               @id @default(autoincrement())
+  metode_pembayaran Metode            @default(KARTU_KREDIT)
+  status_bayar      Status            @default(BELUM_LUNAS)
+  total_bayar       Int               @default(0)
+  tanggal_transaksi DateTime          @default(now())
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  detail_transaksi  DetailTransaksi[]
+  user              Pelanggan?        @relation(fields: [idPelanggan], references: [id_pelanggan])
+  idPelanggan       Int?
+  admin             Admin?            @relation(fields: [idAdmin], references: [id_admin])
+  idAdmin           Int?
+}
+
+model DetailTransaksi {
+  id_detailTransaksi Int        @id @default(autoincrement())
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  game               Game?      @relation(fields: [idGame], references: [id_game])
+  idGame             Int?
+  transaksi          Transaksi? @relation(fields: [idTransaksi], references: [id_transaksi])
+  idTransaksi        Int?
+}
